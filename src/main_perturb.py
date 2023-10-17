@@ -21,14 +21,10 @@ def plot_ten_digits(x, y=None, shape=(28, 28)):
 
 filename = "https://github.com/unica-isde/isde/raw/master/data/mnist_data.csv"
 # filename = "sample_data/mnist_test.csv"
-# data = pd.read_csv(filename)
-#  data = np.array(data)  # cast pandas dataframe to numpy array
 
 data_loader = DataLoaderMNIST(
-    filename=filename, n_samples=100, normalize=False)
+    filename=filename, n_samples=2000, normalize=False)
 x, y = data_loader.load_data()
-
-# xtr, ytr, xts, yts = split_data(x, y, fraction_tr=0.5)
 
 img = x[0, :]
 plt.figure()
@@ -36,7 +32,7 @@ plt.imshow(img.reshape(28, 28), cmap="gray")
 plt.show()
 
 # prt = DataPerturbRandom(K=200)
-prt = DataPerturbGaussian(sigma=100)
+prt = DataPerturbGaussian(sigma=1)
 xp = prt.data_perturbation(img)
 
 plt.figure()
@@ -46,11 +42,51 @@ plt.subplot(1, 2, 2)
 plt.imshow(xp.reshape(28, 28))
 plt.show()
 
+K = [0, 10, 20, 50, 100, 200, 500]
+sigma = [10, 20, 200, 200, 500]
+
+acc_K = np.zeros(shape=len(K))
+acc_sigma = np.zeros(shape=len(sigma))
+
+xtr, ytr, xts, yts = split_data(x, y, fraction_tr=0.6)
+clf = NMC()
+clf.fit(xtr, ytr)
+
+rnd = DataPerturbRandom()
+gsn = DataPerturbGaussian()
+
 plt.figure()
-plot_ten_digits(x, y)
+plot_ten_digits(xts, yts)
 plt.show()
 
-xp = prt.perturb_dataset(x)
+for i, k in enumerate(K):
+    rnd.K = k
+    xts_pert = rnd.perturb_dataset(xts)
+    ypred = clf.predict(xts_pert)
+    acc_K[i] = np.mean(yts == ypred)
+
+    if i == 2:
+        plt.figure()
+        plot_ten_digits(xts_pert, yts)
+        plt.show()
+
+for i, s in enumerate(sigma):
+    gsn.sigma = s
+    xts_pert = gsn.perturb_dataset(xts)
+    ypred = clf.predict(xts_pert)
+    acc_sigma[i] = np.mean(yts == ypred)
+    if i == 2:
+        plt.figure()
+        plot_ten_digits(xts_pert, yts)
+        plt.show()
+
 plt.figure()
-plot_ten_digits(xp, y)
+plt.subplot(1, 2, 1)
+plt.plot(K, acc_K)
+plt.xlabel("K")
+plt.ylabel("Acc")
+plt.subplot(1, 2, 2)
+plt.plot(sigma, acc_sigma)
+plt.xlabel("sigma")
+plt.ylabel("Acc")
 plt.show()

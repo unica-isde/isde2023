@@ -35,4 +35,6 @@ class DataPerturbGaussian(DataPerturb):
 
     def data_perturbation(self, x):
         xp = x + np.round(self.sigma * np.random.randn(x.ravel().size))
+        xp[xp < self.min_value] = self.min_value  # projections on box [0, 255]
+        xp[xp > self.max_value] = self.max_value
         return xp
