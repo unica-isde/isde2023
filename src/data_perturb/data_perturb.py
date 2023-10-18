@@ -11,9 +11,15 @@ class DataPerturb(ABC):
 
     def perturb_dataset(self, data):
         """
-        Modifying the full dataset (one sample per row)
-        :param data: input matrix containing one sample per row
-        :return: perturbed dataset
+        Dataset perturbation...
+
+        Parameters
+        ----------
+        data: input dataset
+
+        Returns
+        -------
+        data_pert: perturbed version of dataset
         """
         if len(data.shape) != 2:
             raise TypeError("Input data has not the right format")
