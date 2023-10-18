@@ -20,6 +20,13 @@ class NMC:
     #    self._centroids = value
 
     def fit(self, xtr, ytr):
+
+        if not isinstance(xtr, np.ndarray):
+            raise TypeError("inputs should be ndarrays")
+
+        if xtr.shape[0] != ytr.size:
+            raise ValueError("input sizes are not consistent")
+
         n_classes = np.unique(ytr).size
         n_features = xtr.shape[1]
         self._centroids = np.zeros(shape=(n_classes, n_features))
